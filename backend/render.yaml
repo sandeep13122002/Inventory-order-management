@@ -1,0 +1,29 @@
+# Render Blueprint for the backend API + managed PostgreSQL.
+# Deploy via Render Dashboard -> "New +" -> "Blueprint" and point it at this repo.
+# Render auto-detects this file at the repo root, so either keep a copy at the
+# root or set the blueprint path to backend/render.yaml.
+
+services:
+  - type: web
+    name: inventory-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inventory-db
+          property: connectionString
+      - key: CORS_ORIGINS
+        # Set this to your deployed frontend URL after Vercel deploy.
+        sync: false
+      - key: LOW_STOCK_THRESHOLD
+        value: "10"
+
+databases:
+  - name: inventory-db
+    plan: free
+    databaseName: inventory_db
+    user: inventory
